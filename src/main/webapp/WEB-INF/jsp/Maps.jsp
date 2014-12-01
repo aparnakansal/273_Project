@@ -1,182 +1,103 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<!-- <html>
-  <head>
-    <title>Simple Map</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <style>
-      html, body, #map-canvas {
-        height: 100%;
-        margin: 0px;
-        padding: 0px
+<html> 
+<head> 
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" /> 
+  <title>Google Maps Multiple Markers</title> 
+  <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js"></script>
+</head> 
+<body>
+  <div id="map" style="width: 500px; height: 400px;"></div>
+
+  <script type="text/javascript">
+    // Define your locations: HTML content for the info window, latitude, longitude
+    var locations = [
+      ['<h4>Bondi Beach, Aparna</h4>', -33.890542, 151.274856],
+      ['<h4>Coogee Beach, Nishant</h4>', -33.923036, 151.259052],
+      ['<h4>Cronulla Beach, Raunaq</h4>', -34.028249, 151.157507],
+      ['<h4>Manly Beach, Bharti</h4>', -33.80010128657071, 151.28747820854187],
+      ['<h4>Maroubra Beach, Arjun</h4>', -33.950198, 151.259302]
+    ];
+    
+    // Setup the different icons and shadows
+    var iconURLPrefix = 'http://maps.google.com/mapfiles/ms/icons/';
+    
+    var icons = [
+      iconURLPrefix + 'red-dot.png',
+      iconURLPrefix + 'green-dot.png',
+      iconURLPrefix + 'blue-dot.png',
+      iconURLPrefix + 'orange-dot.png',
+      iconURLPrefix + 'purple-dot.png',
+      iconURLPrefix + 'pink-dot.png',      
+      iconURLPrefix + 'yellow-dot.png'
+    ]
+    var icons_length = icons.length;
+    
+    
+    var shadow = {
+      anchor: new google.maps.Point(15,33),
+      url: iconURLPrefix + 'msmarker.shadow.png'
+    };
+
+    var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 10,
+      center: new google.maps.LatLng(-37.92, 151.25),
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      mapTypeControl: false,
+      streetViewControl: false,
+      panControl: false,
+      zoomControlOptions: {
+         position: google.maps.ControlPosition.LEFT_BOTTOM
       }
-    </style>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
-    <script>
-var map;
-function initialize() {
-  var mapOptions = {
-    zoom: 8,
-    center: new google.maps.LatLng(-34.397, 150.644)
-  };
-  map = new google.maps.Map(document.getElementById('map-canvas'),
-      mapOptions);
-}
+    });
 
-google.maps.event.addDomListener(window, 'load', initialize);
+    var infowindow = new google.maps.InfoWindow({
+      maxWidth: 160
+    });
 
-    </script>
-  </head>
-  <body>
-    <div id="map-canvas"></div>
-  </body>
-</html> -->
-<html>
-  <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <style>
-      html, body, #map-canvas {
-        height: 100%;
-        margin: 0px;
-        padding: 0px
-      }
-      .controls {
-        margin-top: 16px;
-        border: 1px solid transparent;
-        border-radius: 2px 0 0 2px;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        height: 32px;
-        outline: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      }
-
-      #pac-input {
-        background-color: #fff;
-        padding: 0 11px 0 13px;
-        width: 400px;
-        font-family: Roboto;
-        font-size: 15px;
-        font-weight: 300;
-        text-overflow: ellipsis;
-      }
-
-      #pac-input:focus {
-        border-color: #4d90fe;
-        margin-left: -1px;
-        padding-left: 14px;  /* Regular padding-left + 1. */
-        width: 401px;
-      }
-
-      .pac-container {
-        font-family: Roboto;
-      }
-
-      #type-selector {
-        color: #fff;
-        background-color: #4d90fe;
-        padding: 5px 11px 0px 11px;
-      }
-
-      #type-selector label {
-        font-family: Roboto;
-        font-size: 13px;
-        font-weight: 300;
-      }
-}
-
-    </style>
-    <title>Places search box</title>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
-    <script>
-// This example adds a search box to a map, using the Google Place Autocomplete
-// feature. People can enter geographical searches. The search box will return a
-// pick list containing a mix of places and predicted search terms.
-
-function initialize() {
-
-  var markers = [];
-  var map = new google.maps.Map(document.getElementById('map-canvas'), {
-    mapTypeId: google.maps.MapTypeId.ROADMAP
-  });
-
-  var defaultBounds = new google.maps.LatLngBounds(
-      new google.maps.LatLng(-33.8902, 151.1759),
-      new google.maps.LatLng(-33.8474, 151.2631));
-  map.fitBounds(defaultBounds);
-
-  // Create the search box and link it to the UI element.
-  var input = /** @type {HTMLInputElement} */(
-      document.getElementById('pac-input'));
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-  var searchBox = new google.maps.places.SearchBox(
-    /** @type {HTMLInputElement} */(input));
-
-  // [START region_getplaces]
-  // Listen for the event fired when the user selects an item from the
-  // pick list. Retrieve the matching places for that item.
-  google.maps.event.addListener(searchBox, 'places_changed', function() {
-    var places = searchBox.getPlaces();
-
-    if (places.length == 0) {
-      return;
-    }
-    for (var i = 0, marker; marker = markers[i]; i++) {
-      marker.setMap(null);
-    }
-
-    // For each place, get the icon, place name, and location.
-    markers = [];
-    var bounds = new google.maps.LatLngBounds();
-    for (var i = 0, place; place = places[i]; i++) {
-      var image = {
-        url: place.icon,
-        size: new google.maps.Size(71, 71),
-        origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(17, 34),
-        scaledSize: new google.maps.Size(25, 25)
-      };
-
-      // Create a marker for each place.
-      var marker = new google.maps.Marker({
+    var marker;
+    var markers = new Array();
+    
+    var iconCounter = 0;
+    
+    // Add the markers and infowindows to the map
+    for (var i = 0; i < locations.length; i++) {  
+      marker = new google.maps.Marker({
+        position: new google.maps.LatLng(locations[i][1], locations[i][2]),
         map: map,
-        icon: image,
-        title: place.name,
-        position: place.geometry.location
+        icon : icons[iconCounter],
+        shadow: shadow
       });
 
       markers.push(marker);
 
-      bounds.extend(place.geometry.location);
+      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        return function() {
+          infowindow.setContent(locations[i][0]);
+          infowindow.open(map, marker);
+        }
+      })(marker, i));
+      
+      iconCounter++;
+      // We only have a limited number of possible icon colors, so we may have to restart the counter
+      if(iconCounter >= icons_length){
+      	iconCounter = 0;
+      }
     }
 
-    map.fitBounds(bounds);
-  });
-  // [END region_getplaces]
-
-  // Bias the SearchBox results towards places that are within the bounds of the
-  // current map's viewport.
-  google.maps.event.addListener(map, 'bounds_changed', function() {
-    var bounds = map.getBounds();
-    searchBox.setBounds(bounds);
-  });
-}
-
-google.maps.event.addDomListener(window, 'load', initialize);
-
-    </script>
-    <style>
-      #target {
-        width: 345px;
-      }
-    </style>
-  </head>
-  <body>
-    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
-    <div id="map-canvas"></div>
-  </body>
+    function AutoCenter() {
+      //  Create a new viewpoint bound
+      var bounds = new google.maps.LatLngBounds();
+      //  Go through each...
+      $.each(markers, function (index, marker) {
+        bounds.extend(marker.position);
+      });
+      //  Fit these bounds to the map
+      map.fitBounds(bounds);
+    }
+    AutoCenter();
+  </script> 
+</body>
 </html>
